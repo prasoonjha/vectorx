@@ -54,3 +54,38 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+---
+
+## mcall backend integration
+
+This client talks to the **`vectory`** NestJS backend (sibling repo). No UI is
+wired up yet — this note documents the API surface so the client work can start.
+
+**Base URL:** the `vectory` server (default `http://localhost:3000` in dev).
+
+**Auth (stub):** every request except `GET /directory/:phoneNumber` must send an
+`X-User-Id: <id>` header. This is temporary stub auth; it will be replaced by a
+real token later, so keep the user id resolution behind a single client helper.
+
+**Android capability note:** the MVP is designed around the Android 10+
+`CallScreeningService` + `ROLE_CALL_SCREENING` role (caller ID + spam screening
+for unknown numbers, live, without `READ_CALL_LOG`). Reading historical call
+logs requires the heavier default-Phone-handler / Play exception route and is
+deferred. See `vectory/README.md` → "Platform constraints & risks".
+
+**Endpoints:**
+
+| Purpose | Call |
+|---------|------|
+| Quick-save a lead | `POST /contacts/quick-save` `{ phoneNumber, name?, tag?, source? }` |
+| List / get / delete contacts | `GET /contacts`, `GET /contacts/:id`, `DELETE /contacts/:id` |
+| Add a call note | `POST /notes` `{ phoneNumber, body, callRecordId? }` |
+| Notes for a number | `GET /notes?phoneNumber=` |
+| Look up a number's label | `GET /directory/:phoneNumber` |
+| Contribute / vote on a label | `POST /directory`, `POST /directory/:id/vote` `{ value: 1 \| -1 }` |
+| Search history | `GET /search?q=` |
+| Reminders | `POST /reminders`, `GET /reminders`, `GET /reminders/due`, `PATCH /reminders/:id` |
+| Export / delete my data | `GET /me/export`, `DELETE /me` |
+
+Full contracts live in `vectory/README.md`.
